@@ -1,3 +1,7 @@
+# FBI Warning:
+# Till 2021/06/21, only God and me could understand this code.
+# I guess a few months later, only God could understand it.
+
 # 东方上学传
 # 共5面
 # 讲述灵梦的上学故事
@@ -12,15 +16,15 @@ import pygame, sys, random
 
 size = (1000,650)
 bg_color = (0,233,0)
-tick = 5#10
+tick = 10
 
 # Game constant number
-MAXENERMY = 5#3
-MAXSPEED = 5#3
-MAXPLAYERBULLET = 100#40
-PLAYERBULLETDELAY = 100#400
-MAXENERMYBULLET = 10#7
-ENERMYBULLETDELAY = 100#300
+MAXENERMY = 3
+MAXSPEED = 3
+MAXPLAYERBULLET = 40
+PLAYERBULLETDELAY = 400
+MAXENERMYBULLET = 7
+ENERMYBULLETDELAY = 300
 
 pygame.init()
 screen = pygame.display.set_mode(size)
@@ -84,10 +88,18 @@ class Dock(pygame.sprite.Sprite):
         else:
             self.rect.left, self.rect.top = player.rect.left - self.width/2 + player.width/2 + 70, player.rect.top - self.height/2 + player.height/2
 
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('./img/gameimg/bullet.png')
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+
 player = Player()
 reimu = Reimu()
 dock_left = Dock(bear = 'left')
 dock_right = Dock(bear = 'right')
+bullet = pygame.sprite.Group()
 
 def animate():
     screen.fill(bg_color)
