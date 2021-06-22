@@ -15,7 +15,7 @@
 import pygame, sys, random
 
 size = (1000,650)
-bg_color = (0,233,0)
+bg_color = (255,255,255)
 tick = 4
 
 # Game constant number
@@ -75,6 +75,13 @@ class Reimu(pygame.sprite.Sprite):
         self.height = self.rect.bottom - self.rect.top
         self.width = self.rect.right - self.rect.left
         self.rect.left, self.rect.top = player.rect.left - self.width/2 + player.width/2, player.rect.top - self.height/2 + player.height/2
+
+class Marisa(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('./img/gameimg/marisa_up.png')
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
 
 class Dock(pygame.sprite.Sprite):
     def __init__(self, bear):
