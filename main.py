@@ -16,19 +16,18 @@ import pygame, sys, random
 
 size = (1000,650)
 bg_color = (0,233,0)
-tick = 10
+tick = 4
 
 # Game constant number
-MAXENERMY = 3
-MAXSPEED = 3
-MAXPLAYERBULLET = 40
-PLAYERBULLETDELAY = 400
-MAXENERMYBULLET = 7
-ENERMYBULLETDELAY = 300
+MAXPLAYERBULLET = 80
+PLAYERBULLETDELAY = 20
 
 pygame.init()
 screen = pygame.display.set_mode(size)
 screen.fill(bg_color)
+
+player_bullets_delay = 0
+player_bullets_num = 0
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -54,6 +53,15 @@ class Player(pygame.sprite.Sprite):
         if self.pos[1] > size[1]:
             self.pos[1] = size[1]
         self.rect.left, self.rect.top = self.pos
+
+    def shoot(self):
+        global player_bullets_num, player_bullets_delay
+        print(player_bullets_delay, player_bullets_num)
+        if player_bullets_num <= MAXPLAYERBULLET and player_bullets_delay >= PLAYERBULLETDELAY:
+            player_bullets.add(Player_Bullet(self.rect))
+            player_bullets_delay = 0
+            player_bullets_num += 1
+        player_bullets_delay += 1
 
 class Reimu(pygame.sprite.Sprite):
     def __init__(self):
@@ -88,29 +96,44 @@ class Dock(pygame.sprite.Sprite):
         else:
             self.rect.left, self.rect.top = player.rect.left - self.width/2 + player.width/2 + 70, player.rect.top - self.height/2 + player.height/2
 
-class Bullet(pygame.sprite.Sprite):
-    def __init__(self):
+class Player_Bullet(pygame.sprite.Sprite):
+    def __init__(self, pos):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load('./img/gameimg/bullet.png')
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
+        self.rect = pos
+        self.out = False
+
+    def move(self):
+        self.rect = self.rect.move([0,-5])
+        if self.rect.top < 0:
+            self.out = True
 
 player = Player()
 reimu = Reimu()
 dock_left = Dock(bear = 'left')
 dock_right = Dock(bear = 'right')
-bullet = pygame.sprite.Group()
+player_bullets = pygame.sprite.Group()
 
 def animate():
+    global player_bullets_num
     screen.fill(bg_color)
     player.move()
     reimu.move()
     dock_left.move()
     dock_right.move()
+    player.shoot()
+    for player_bullet in player_bullets.sprites():
+        player_bullet.move()
+        screen.blit(player_bullet.image, player_bullet.rect)
+        if player_bullet.out:
+            player_bullets.remove(player_bullet)
+            player_bullets_num -= 1
     screen.blit(reimu.image, reimu.rect)
-    screen.blit(player.image, player.rect)
     screen.blit(dock_left.image, dock_left.rect)
     screen.blit(dock_right.image, dock_right.rect)
+    screen.blit(player.image, player.rect)
     pygame.display.flip()
 
 running = True
@@ -120,3 +143,4 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+    pygame.time.delay(tick)
