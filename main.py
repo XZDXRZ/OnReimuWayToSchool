@@ -12,7 +12,8 @@
 #      早苗——你妈
 #      爱丽丝——老师
 
-import pygame, sys, random
+import pygame
+import sys, random
 
 size = (1000,650)
 bg_color = (255,255,255)
@@ -28,6 +29,7 @@ screen.fill(bg_color)
 
 player_bullets_delay = 0
 player_bullets_num = 0
+grade = 1
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -56,7 +58,6 @@ class Player(pygame.sprite.Sprite):
 
     def shoot(self):
         global player_bullets_num, player_bullets_delay
-        print(player_bullets_delay, player_bullets_num)
         if player_bullets_num <= MAXPLAYERBULLET and player_bullets_delay >= PLAYERBULLETDELAY:
             player_bullets.add(Player_Bullet(self.rect))
             player_bullets_delay = 0
@@ -80,8 +81,23 @@ class Marisa(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load('./img/gameimg/marisa_up.png')
+        self.image = pygame.transform.scale(self.image, (128, 256))
+        self.rect = self.image.get_rect()
+        self.rect.left, self.rect.top = (size[0]/2 - (self.rect.right - self.rect.left)/2, 0)
+        self.mask = pygame.mask.from_surface(self.image)
+
+    #def shoot(self):
+    #    
+
+class Marisa_Bullets(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('./img/gameimg/bullet.png')
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
+
+    #def first(self, type): #第一波子弹
+    #    
 
 class Dock(pygame.sprite.Sprite):
     def __init__(self, bear):
@@ -119,9 +135,11 @@ class Player_Bullet(pygame.sprite.Sprite):
 
 player = Player()
 reimu = Reimu()
+marisa = Marisa()
 dock_left = Dock(bear = 'left')
 dock_right = Dock(bear = 'right')
 player_bullets = pygame.sprite.Group()
+marisa_bullets = pygame.sprite.Group()
 
 def animate():
     global player_bullets_num
@@ -137,6 +155,8 @@ def animate():
         if player_bullet.out:
             player_bullets.remove(player_bullet)
             player_bullets_num -= 1
+    if grade == 1:
+        screen.blit(marisa.image, marisa.rect)
     screen.blit(reimu.image, reimu.rect)
     screen.blit(dock_left.image, dock_left.rect)
     screen.blit(dock_right.image, dock_right.rect)
