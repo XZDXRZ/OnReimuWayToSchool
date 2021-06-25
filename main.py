@@ -17,7 +17,7 @@ import sys, random
 
 size = (1000,650)
 bg_color = (255,255,255)
-tick = 4
+tick = 10
 
 # Game constant number
 MAXPLAYERBULLET = 80
@@ -29,6 +29,7 @@ screen.fill(bg_color)
 
 player_bullets_delay = 0
 player_bullets_num = 0
+player_pos = []
 grade = 1
 
 class Player(pygame.sprite.Sprite):
@@ -55,6 +56,7 @@ class Player(pygame.sprite.Sprite):
         if self.pos[1] > size[1]:
             self.pos[1] = size[1]
         self.rect.left, self.rect.top = self.pos
+        return pygame.mouse.get_pos()
 
     def shoot(self):
         global player_bullets_num, player_bullets_delay
@@ -85,19 +87,31 @@ class Marisa(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = (size[0]/2 - (self.rect.right - self.rect.left)/2, 0)
         self.mask = pygame.mask.from_surface(self.image)
+        self.shoot_delay = 30
 
-    #def shoot(self):
-    #    
+    def shoot1(self): #第一波弹幕
+        if self.shoot_delay <= 0:
+            marisa_bullets.add(Marisa_Bullets())
+            self.shoot_delay = 30
+        for bullet in marisa_bullets.sprites():
+            bullet.move1()
+        self.shoot_delay -= 1
 
 class Marisa_Bullets(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
+        global player_pos
         self.image = pygame.image.load('./img/gameimg/bullet.png')
         self.rect = self.image.get_rect()
+        self.rect = marisa.rect
         self.mask = pygame.mask.from_surface(self.image)
+        if player_pos != []:
+            self.t = [-(marisa.rect.left - player_pos[0]) / 70, -(marisa.rect.top - player_pos[1]) / 70]
+        else:
+            self.t = [0, 0]
 
-    #def first(self, type): #第一波子弹
-    #    
+    def move1(self):
+        self.rect = self.rect.move(self.t)
 
 class Dock(pygame.sprite.Sprite):
     def __init__(self, bear):
@@ -142,9 +156,9 @@ player_bullets = pygame.sprite.Group()
 marisa_bullets = pygame.sprite.Group()
 
 def animate():
-    global player_bullets_num
+    global player_bullets_num, player_pos
     screen.fill(bg_color)
-    player.move()
+    player_pos = player.move()
     reimu.move()
     dock_left.move()
     dock_right.move()
@@ -157,6 +171,11 @@ def animate():
             player_bullets_num -= 1
     if grade == 1:
         screen.blit(marisa.image, marisa.rect)
+        marisa.shoot1()
+        for bullet in marisa_bullets.sprites():
+            screen.blit(bullet.image, bullet.rect)
+            if bullet.rect.left < 0 or bullet.rect.left > size[0] or bullet.rect.top > size[1]:
+                bullet.kill()
     screen.blit(reimu.image, reimu.rect)
     screen.blit(dock_left.image, dock_left.rect)
     screen.blit(dock_right.image, dock_right.rect)
