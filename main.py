@@ -66,6 +66,11 @@ class Player(pygame.sprite.Sprite):
             player_bullets_num += 1
         player_bullets_delay += 1
 
+    def game_over(self):
+        global running
+        if pygame.sprite.spritecollide(player, marisa_bullets, False, pygame.sprite.collide_mask):
+            running = False
+
 class Reimu(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -157,6 +162,7 @@ marisa_bullets = pygame.sprite.Group()
 
 def animate():
     global player_bullets_num, player_pos
+    player.game_over()
     screen.fill(bg_color)
     player_pos = player.move()
     reimu.move()
@@ -169,6 +175,7 @@ def animate():
         if player_bullet.out:
             player_bullets.remove(player_bullet)
             player_bullets_num -= 1
+    screen.blit(reimu.image, reimu.rect)
     if grade == 1:
         screen.blit(marisa.image, marisa.rect)
         marisa.shoot1()
@@ -176,7 +183,6 @@ def animate():
             screen.blit(bullet.image, bullet.rect)
             if bullet.rect.left < 0 or bullet.rect.left > size[0] or bullet.rect.top > size[1]:
                 bullet.kill()
-    screen.blit(reimu.image, reimu.rect)
     screen.blit(dock_left.image, dock_left.rect)
     screen.blit(dock_right.image, dock_right.rect)
     screen.blit(player.image, player.rect)
