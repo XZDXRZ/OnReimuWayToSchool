@@ -93,15 +93,20 @@ class Marisa(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = (size[0]/2 - (self.rect.right - self.rect.left)/2, 0)
         self.mask = pygame.mask.from_surface(self.image)
-        self.shoot_delay = 30
+        self.shoot_delay = 0
+        self.blood = 100
 
     def shoot1(self): #第一波弹幕
         if self.shoot_delay <= 0:
             marisa_bullets.add(Marisa_Bullets())
-            self.shoot_delay = 30
+            self.shoot_delay = 20
         for bullet in marisa_bullets.sprites():
             bullet.move1()
         self.shoot_delay -= 1
+
+    def behit(self):
+        if pygame.sprite.spritecollide(marisa, player_bullets, True, pygame.sprite.collide_mask):
+            self.blood -= 1
 
 class Marisa_Bullets(pygame.sprite.Sprite):
     def __init__(self):
@@ -109,10 +114,10 @@ class Marisa_Bullets(pygame.sprite.Sprite):
         global player_pos
         self.image = pygame.image.load('./img/gameimg/bullet.png')
         self.rect = self.image.get_rect()
-        self.rect = marisa.rect
+        self.rect.left, self.rect.top = marisa.rect.left + (marisa.rect.right - marisa.rect.left)/2, marisa.rect.top + (marisa.rect.bottom - marisa.rect.top)/2
         self.mask = pygame.mask.from_surface(self.image)
         if player_pos != []:
-            self.t = [-(marisa.rect.left - player_pos[0]) / 70, -(marisa.rect.top - player_pos[1]) / 70]
+            self.t = [-(self.rect.left - player_pos[0]) / 50, -(self.rect.top - player_pos[1]) / 50]
         else:
             self.t = [0, 0]
 
@@ -163,6 +168,7 @@ marisa_bullets = pygame.sprite.Group()
 
 def animate():
     global player_bullets_num, player_pos
+    font = pygame.font.SysFont("Times", 50)
     player.game_over()
     screen.fill(bg_color)
     player_pos = player.move()
@@ -180,6 +186,9 @@ def animate():
     if grade == 1:
         screen.blit(marisa.image, marisa.rect)
         marisa.shoot1()
+        marisa.behit()
+        marisa_blood = font.render("Marisa Blood: " + str(marisa.blood), True, (0,0,0))
+        screen.blit(marisa_blood, (0,0))
         for bullet in marisa_bullets.sprites():
             screen.blit(bullet.image, bullet.rect)
             if bullet.rect.left < 0 or bullet.rect.left > size[0] or bullet.rect.top > size[1]:
