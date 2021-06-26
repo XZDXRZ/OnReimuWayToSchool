@@ -13,7 +13,7 @@
 #      爱丽丝——老师
 
 import pygame
-import sys, random
+import sys, random, time
 
 size = (1000,650)
 bg_color = (255,255,255)
@@ -26,6 +26,7 @@ PLAYERBULLETDELAY = 20
 pygame.init()
 screen = pygame.display.set_mode(size)
 screen.fill(bg_color)
+pygame.display.set_caption("东方上学传")
 
 player_bullets_delay = 0
 player_bullets_num = 0
@@ -67,9 +68,9 @@ class Player(pygame.sprite.Sprite):
         player_bullets_delay += 1
 
     def game_over(self):
-        global running
+        global GG
         if pygame.sprite.spritecollide(player, marisa_bullets, False, pygame.sprite.collide_mask):
-            running = False
+            GG = True
 
 class Reimu(pygame.sprite.Sprite):
     def __init__(self):
@@ -189,6 +190,7 @@ def animate():
     pygame.display.flip()
 
 running = True
+GG = False
 
 while running:
     animate()
@@ -196,3 +198,11 @@ while running:
         if event.type == pygame.QUIT:
             running = False
     pygame.time.delay(tick)
+    if GG == True:
+        font = pygame.font.SysFont("Times", 70)
+        gameover_text = font.render("Game Over!", True, (255, 100, 100))
+        screen.fill((255,0,0))
+        screen.blit(gameover_text, (340, 280))
+        pygame.display.flip()
+        time.sleep(1)
+        break
