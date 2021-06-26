@@ -20,6 +20,7 @@ bg_color = (255,255,255)
 tick = 10
 
 # Game constant number
+MAXPLAYERBULLET = 80
 PLAYERBULLETDELAY = 20
 
 pygame.init()
@@ -28,6 +29,7 @@ screen.fill(bg_color)
 pygame.display.set_caption("东方上学传")
 
 player_bullets_delay = 0
+player_bullets_num = 0
 player_pos = []
 grade = 1
 
@@ -59,9 +61,10 @@ class Player(pygame.sprite.Sprite):
 
     def shoot(self):
         global player_bullets_num, player_bullets_delay
-        if player_bullets_delay >= PLAYERBULLETDELAY:
+        if player_bullets_num <= MAXPLAYERBULLET and player_bullets_delay >= PLAYERBULLETDELAY:
             player_bullets.add(Player_Bullet(self.rect))
             player_bullets_delay = 0
+            player_bullets_num += 1
         player_bullets_delay += 1
 
     def game_over(self):
@@ -178,6 +181,7 @@ def animate():
         screen.blit(player_bullet.image, player_bullet.rect)
         if player_bullet.out:
             player_bullets.remove(player_bullet)
+            player_bullets_num -= 1
     screen.blit(reimu.image, reimu.rect)
     if grade == 1:
         screen.blit(marisa.image, marisa.rect)
