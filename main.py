@@ -30,6 +30,10 @@ pygame.display.set_caption("东方上学传")
 player_bullets_delay = 0
 player_pos = []
 grade = 1
+communication = [
+    [False, False, False, False, False],
+    [False, False, False, False, False]
+] #代表10次剧情
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -164,9 +168,9 @@ player_bullets = pygame.sprite.Group()
 marisa_bullets = pygame.sprite.Group()
 
 def animate():
-    global player_bullets_num, player_pos
-    font = pygame.font.SysFont("Times", 50)
+    global player_pos, grade
     player.game_over()
+    font = pygame.font.SysFont("Times", 50)
     screen.fill(bg_color)
     player_pos = player.move()
     reimu.move()
@@ -179,7 +183,7 @@ def animate():
         if player_bullet.out:
             player_bullets.remove(player_bullet)
     screen.blit(reimu.image, reimu.rect)
-    if grade == 1:
+    if grade == 1: #魔理沙关
         screen.blit(marisa.image, marisa.rect)
         marisa.shoot1()
         marisa.behit()
@@ -188,6 +192,11 @@ def animate():
         for bullet in marisa_bullets.sprites():
             screen.blit(bullet.image, bullet.rect)
             if bullet.rect.left < 0 or bullet.rect.left > size[0] or bullet.rect.top > size[1]:
+                bullet.kill()
+        if marisa.blood <= 0:
+            grade = 2
+            marisa.kill()
+            for bullet in marisa_bullets.sprites():
                 bullet.kill()
     screen.blit(dock_left.image, dock_left.rect)
     screen.blit(dock_right.image, dock_right.rect)
