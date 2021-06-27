@@ -20,7 +20,7 @@ bg_color = (255,255,255)
 tick = 10
 
 # Game constant number
-PLAYERBULLETDELAY = 20
+PLAYERBULLETDELAY = 15
 
 pygame.init()
 screen = pygame.display.set_mode(size)
@@ -30,15 +30,16 @@ pygame.display.set_caption("东方上学传")
 player_bullets_delay = 0
 player_pos = []
 grade = 1
-communication = [
-    [False, False, False, False, False],
-    [False, False, False, False, False]
-] #代表10次剧情
+communication = [False, False, False, False, False] #代表10次剧情其中5个
+hostile_pos = [0, 200]
+reimu_pos = [800, 200]
+dialog_pos = [0, 500]
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load('./img/gameimg/death_point.png')
+        self.image = pygame.transform.scale(self.image, (15, 15))
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = (100,50)
         self.mask = pygame.mask.from_surface(self.image)
@@ -80,6 +81,7 @@ class Reimu(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = (100,50)
         self.mask = pygame.mask.from_surface(self.image)
+        self.character = pygame.image.load('./img/characters/Reimu.png')
 
     def move(self):
         self.height = self.rect.bottom - self.rect.top
@@ -95,7 +97,8 @@ class Marisa(pygame.sprite.Sprite):
         self.rect.left, self.rect.top = (size[0]/2 - (self.rect.right - self.rect.left)/2, 0)
         self.mask = pygame.mask.from_surface(self.image)
         self.shoot_delay = 0
-        self.blood = 100
+        self.blood = 5#100
+        self.character = pygame.image.load('./img/characters/Marisa.png')
 
     def shoot1(self): #第一波弹幕
         if self.shoot_delay <= 0:
@@ -155,7 +158,7 @@ class Player_Bullet(pygame.sprite.Sprite):
         self.out = False
 
     def move(self):
-        self.rect = self.rect.move([0,-5])
+        self.rect = self.rect.move([0,-10])
         if self.rect.top < 0:
             self.out = True
 
@@ -183,6 +186,9 @@ def animate():
         if player_bullet.out:
             player_bullets.remove(player_bullet)
     screen.blit(reimu.image, reimu.rect)
+    screen.blit(dock_left.image, dock_left.rect)
+    screen.blit(dock_right.image, dock_right.rect)
+    screen.blit(player.image, player.rect)
     if grade == 1: #魔理沙关
         screen.blit(marisa.image, marisa.rect)
         marisa.shoot1()
@@ -195,12 +201,22 @@ def animate():
                 bullet.kill()
         if marisa.blood <= 0:
             grade = 2
+            screen.blit(marisa.character, hostile_pos)
+            pygame.display.flip()
+            next = False
+            ################################################################
+            #************************Unfinished****************************#
+            ################################################################
+            while not next:
+                for event in pygame.event.get():
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        next = True
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        exit()
             marisa.kill()
             for bullet in marisa_bullets.sprites():
                 bullet.kill()
-    screen.blit(dock_left.image, dock_left.rect)
-    screen.blit(dock_right.image, dock_right.rect)
-    screen.blit(player.image, player.rect)
     pygame.display.flip()
 
 running = True
