@@ -32,7 +32,7 @@ player_pos = []
 grade = 1
 communication = [False, False, False, False, False] #代表10次剧情其中5个
 hostile_pos = [0, 200]
-reimu_pos = [800, 200]
+reimu_pos = [500, 200]
 dialog_pos = [0, 500]
 
 class Player(pygame.sprite.Sprite):
@@ -97,7 +97,7 @@ class Marisa(pygame.sprite.Sprite):
         self.rect.left, self.rect.top = (size[0]/2 - (self.rect.right - self.rect.left)/2, 0)
         self.mask = pygame.mask.from_surface(self.image)
         self.shoot_delay = 0
-        self.blood = 5#100
+        self.blood = 100
         self.character = pygame.image.load('./img/characters/Marisa.png')
 
     def shoot1(self): #第一波弹幕
@@ -162,6 +162,16 @@ class Player_Bullet(pygame.sprite.Sprite):
         if self.rect.top < 0:
             self.out = True
 
+def Continue():
+    next = False
+    while not next:
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                next = True
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+
 player = Player()
 reimu = Reimu()
 marisa = Marisa()
@@ -173,7 +183,7 @@ marisa_bullets = pygame.sprite.Group()
 def animate():
     global player_pos, grade
     player.game_over()
-    font = pygame.font.SysFont("Times", 50)
+    font = pygame.font.Font('./Font/FZLTHJW.ttf', 30)
     screen.fill(bg_color)
     player_pos = player.move()
     reimu.move()
@@ -190,10 +200,37 @@ def animate():
     screen.blit(dock_right.image, dock_right.rect)
     screen.blit(player.image, player.rect)
     if grade == 1: #魔理沙关
+        if not communication[0]:
+            text = []
+            text.append(font.render("你醒啦", True, (255,255,255)))
+            text.append(font.render("什么我已经变成女孩子了吗", True, (255,255,255)))
+            text.append(font.render("不我只是想让你借我抄下作业", True, (255,255,255)))
+            text.append(font.render("没门", True, (255,255,255)))
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(marisa.character, hostile_pos)
+            screen.blit(text[0], (500,500))
+            pygame.display.flip()
+            Continue()
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(reimu.character, reimu_pos)
+            screen.blit(text[1], (300,500))
+            pygame.display.flip()
+            Continue()
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(marisa.character, hostile_pos)
+            screen.blit(text[2], (500,500))
+            pygame.display.flip()
+            Continue()
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(reimu.character, reimu_pos)
+            screen.blit(text[3], (300,500))
+            pygame.display.flip()
+            Continue()
+            communication[0] = True
         screen.blit(marisa.image, marisa.rect)
         marisa.shoot1()
         marisa.behit()
-        marisa_blood = font.render("Marisa Blood: " + str(marisa.blood), True, (0,0,0))
+        marisa_blood = font.render("魔理沙血量：" + str(marisa.blood), True, (0,0,0))
         screen.blit(marisa_blood, (0,0))
         for bullet in marisa_bullets.sprites():
             screen.blit(bullet.image, bullet.rect)
@@ -201,19 +238,31 @@ def animate():
                 bullet.kill()
         if marisa.blood <= 0:
             grade = 2
+            text = []
+            text.append(font.render("灵梦， 你在干什么啊！灵梦", True, (255,255,255)))
+            text.append(font.render("希腊奶", True, (255,255,255)))
+            text.append(font.render("凭什么不给我抄作业？你坏！", True, (255,255,255)))
+            text.append(font.render("等着挨骂去吧，^_^", True, (255,255,255)))
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
             screen.blit(marisa.character, hostile_pos)
+            screen.blit(text[0], (500,500))
             pygame.display.flip()
-            next = False
-            ################################################################
-            #************************Unfinished****************************#
-            ################################################################
-            while not next:
-                for event in pygame.event.get():
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        next = True
-                    if event.type == pygame.QUIT:
-                        pygame.quit()
-                        exit()
+            Continue()
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(reimu.character, reimu_pos)
+            screen.blit(text[1], (300,500))
+            pygame.display.flip()
+            Continue()
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(marisa.character, hostile_pos)
+            screen.blit(text[2], (500,500))
+            pygame.display.flip()
+            Continue()
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(reimu.character, reimu_pos)
+            screen.blit(text[3], (300,500))
+            pygame.display.flip()
+            Continue()
             marisa.kill()
             for bullet in marisa_bullets.sprites():
                 bullet.kill()
