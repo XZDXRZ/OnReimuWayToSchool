@@ -184,7 +184,29 @@ class Cirno(pygame.sprite.Sprite):
         self.image = pygame.image.load('./img/gameimg/cirno_up.png')
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = (size[0]/2 - (self.rect.right - self.rect.left)/2, 0)
-        self.mask = pygame.mask.from_surface(self.rect)
+        self.mask = pygame.mask.from_surface(self.image)
+        self.character = pygame.image.load('./img/characters/Cirno.png')
+        self.bearing = math.atan((self.rect.center[0] - player_pos[0])/(self.rect.center[1] - player_pos[1]))
+
+    #def shoot(self):
+    #    
+
+class Cirno_Bullets(pygame.sprite.Sprite):
+    def __init__(self, direction, distance):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('./img/gameimg/bullet.png')
+        self.rect = self.image.get_rect()
+        self.rect.left, self.rect.top = cirno.rect.left + (cirno.rect.right - cirno.rect.left)/2, cirno.rect.top + (cirno.rect.bottom - cirno.rect.top)/2
+        self.mask = pygame.mask.from_surface(self.image)
+        self.origin_pos = self.rect
+        self.direction = direction
+        self.distance = distance
+        self.t = [math.sin(self.direction)*5.1, math.cos(self.direction)*5.1]
+
+    def move(self):
+        self.rect = self.rect.move(self.t)
+        if (self.origin_pos[0]-self.rect[0])**2+(self.origin_pos[1]-self.rect[1])**2 == self.distance**2:
+            self.t = [0,0]
 
 def Continue():
     next = False
@@ -198,9 +220,10 @@ def Continue():
 
 player = Player()
 reimu = Reimu()
-marisa = Marisa()
 dock_left = Dock(bear = 'left')
 dock_right = Dock(bear = 'right')
+marisa = Marisa()
+cirno = Cirno()
 player_bullets = pygame.sprite.Group()
 marisa_bullets = pygame.sprite.Group()
 
@@ -291,8 +314,8 @@ def animate():
             marisa.kill()
             for bullet in marisa_bullets.sprites():
                 bullet.kill()
-    #if grade == 2: #琪露诺关
-    #    
+    if grade == 2: #琪露诺关
+        screen.blit(cirno.image, cirno.rect)
     pygame.display.flip()
 
 running = True
