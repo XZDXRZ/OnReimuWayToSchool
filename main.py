@@ -12,6 +12,7 @@
 #      早苗——你妈
 #      爱丽丝——老师
 
+from hashlib import blake2b
 import pygame
 import sys, random, time, math
 
@@ -131,14 +132,14 @@ class Marisa(pygame.sprite.Sprite):
         self.rect.left, self.rect.top = (size[0]/2 - (self.rect.right - self.rect.left)/2, 0)
         self.mask = pygame.mask.from_surface(self.image)
         self.shoot_delay = 0
-        self.blood = 100
+        self.blood = 1#100
         self.character = pygame.image.load('./img/characters/Marisa.png')
         self.bullet_now = 0
         self.can_shoot = True
         self.big_shoot_delay = 40
         self.bearing = math.atan((self.rect.center[0] - player_pos[0])/(self.rect.center[1] - player_pos[1]))
 
-    def shoot1(self): #第一波弹幕
+    def shoot(self): #第一波弹幕
         if self.shoot_delay <= 0 and self.can_shoot:
             marisa_bullets.add(Marisa_Bullets(self.bearing + math.radians(5)))
             marisa_bullets.add(Marisa_Bullets(self.bearing - math.radians(5)))
@@ -186,10 +187,25 @@ class Cirno(pygame.sprite.Sprite):
         self.rect.left, self.rect.top = (size[0]/2 - (self.rect.right - self.rect.left)/2, 0)
         self.mask = pygame.mask.from_surface(self.image)
         self.character = pygame.image.load('./img/characters/Cirno.png')
-        self.bearing = math.atan((self.rect.center[0] - player_pos[0])/(self.rect.center[1] - player_pos[1]))
+        self.blood = 40
+        self.bullet_num = 0
+        self.change_delay = 0
+        self.changed = False
 
-    #def shoot(self):
-    #    
+    def behit(self):
+        if pygame.sprite.spritecollide(cirno, player_bullets, True, pygame.sprite.collide_mask):
+            self.blood -= 1
+
+    def shoot(self):
+        for i in range(30):
+            if self.bullet_num <= 100:
+                self.bullet_num += 1
+                cirno_bullets.add(Cirno_Bullets(random.randint(270, 360), random.randint(40, 500)**2+random.randint(70, 300)**2))
+            if self.bullet_num <= 100:
+                self.bullet_num += 1
+                cirno_bullets.add(Cirno_Bullets(random.randint(0, 90), random.randint(40, 500)**2+random.randint(70, 300)**2))
+        for bullet in cirno_bullets:
+            bullet.move()
 
 class Cirno_Bullets(pygame.sprite.Sprite):
     def __init__(self, direction, distance):
@@ -199,14 +215,24 @@ class Cirno_Bullets(pygame.sprite.Sprite):
         self.rect.left, self.rect.top = cirno.rect.left + (cirno.rect.right - cirno.rect.left)/2, cirno.rect.top + (cirno.rect.bottom - cirno.rect.top)/2
         self.mask = pygame.mask.from_surface(self.image)
         self.origin_pos = self.rect
-        self.direction = direction
+        self.direction = math.radians(direction)
         self.distance = distance
         self.t = [math.sin(self.direction)*5.1, math.cos(self.direction)*5.1]
+        self.stage = 1
+        self.changed = False
 
     def move(self):
         self.rect = self.rect.move(self.t)
-        if (self.origin_pos[0]-self.rect[0])**2+(self.origin_pos[1]-self.rect[1])**2 == self.distance**2:
-            self.t = [0,0]
+        if (self.origin_pos[0]-self.rect[0])**2+(self.origin_pos[1]-self.rect[1])**2 >= self.distance: # don't need to square
+            if self.stage == 1:
+                self.t = [0,0]
+        if self.stage == 2 and (not self.changed):
+            x = random.uniform(-1.0, 1.0)
+            y = random.uniform(-1.0, 1.0)
+            # x = x if x==0.0 else x+1
+            # y = y if y==0.0 else y+1
+            self.t = [x*3, y*3]
+            self.changed = True
 
 def Continue():
     next = False
@@ -226,6 +252,7 @@ marisa = Marisa()
 cirno = Cirno()
 player_bullets = pygame.sprite.Group()
 marisa_bullets = pygame.sprite.Group()
+cirno_bullets = pygame.sprite.Group()
 
 def animate():
     global player_pos, grade
@@ -275,7 +302,7 @@ def animate():
             Continue()
             communication[0] = True
         screen.blit(marisa.image, marisa.rect)
-        marisa.shoot1()
+        marisa.shoot()
         marisa.behit()
         marisa.bearing = math.atan((marisa.rect.center[0] - player_pos[0])/(marisa.rect.center[1] - player_pos[1]))
         marisa_blood = font.render("魔理沙血量：" + str(marisa.blood), True, (0,0,0))
@@ -316,6 +343,21 @@ def animate():
                 bullet.kill()
     if grade == 2: #琪露诺关
         screen.blit(cirno.image, cirno.rect)
+        cirno.shoot()
+        cirno.behit()
+        cirno_blood = font.render("琪露诺血量：" + str(cirno.blood), True, (0,0,0))
+        screen.blit(cirno_blood, (0,0))
+        for bullet in cirno_bullets.sprites():
+            screen.blit(bullet.image, bullet.rect)
+            if bullet.rect.left < 0 or bullet.rect.left > size[0] or bullet.rect.top > size[1]:
+                bullet.kill()
+        if cirno.change_delay >= 130:
+            for bullet in cirno_bullets:
+                bullet.stage = 2
+        if cirno.blood <= 0:
+            exit()
+        if not cirno.changed:
+            cirno.change_delay += 1
     pygame.display.flip()
 
 running = True
