@@ -71,11 +71,11 @@ class Player(pygame.sprite.Sprite):
         player_bullets_delay += 1
 
     def game_over(self):
-        global GG
+        global gg
         if pygame.sprite.spritecollide(player, marisa_bullets, False, pygame.sprite.collide_mask):
-            GG = True
+            gg = True
         # if pygame.sprite.spritecollide(player, cirno_bullets, False, pygame.sprite.collide_mask):
-        #     GG = True
+        #     gg = True
 
 class Player_Bullet(pygame.sprite.Sprite):
     def __init__(self, pos):
@@ -421,7 +421,7 @@ def animate():
     pygame.display.flip()
 
 running = True
-GG = False
+gg = False
 
 while running:
     animate()
@@ -429,7 +429,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
     pygame.time.delay(tick)
-    if GG == True:
+    if gg == True:
         font = pygame.font.SysFont("Times", 70)
         gameover_text = font.render("Game Over!", True, (255, 100, 100))
         screen.fill((255,0,0))
