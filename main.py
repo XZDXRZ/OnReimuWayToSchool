@@ -74,6 +74,8 @@ class Player(pygame.sprite.Sprite):
         global GG
         if pygame.sprite.spritecollide(player, marisa_bullets, False, pygame.sprite.collide_mask):
             GG = True
+        # if pygame.sprite.spritecollide(player, cirno_bullets, False, pygame.sprite.collide_mask):
+        #     GG = True
 
 class Player_Bullet(pygame.sprite.Sprite):
     def __init__(self, pos):
@@ -132,7 +134,7 @@ class Marisa(pygame.sprite.Sprite):
         self.rect.left, self.rect.top = (size[0]/2 - (self.rect.right - self.rect.left)/2, 0)
         self.mask = pygame.mask.from_surface(self.image)
         self.shoot_delay = 0
-        self.blood = 1#100
+        self.blood = 1#40
         self.character = pygame.image.load('./img/characters/Marisa.png')
         self.bullet_now = 0
         self.can_shoot = True
@@ -187,7 +189,7 @@ class Cirno(pygame.sprite.Sprite):
         self.rect.left, self.rect.top = (size[0]/2 - (self.rect.right - self.rect.left)/2, 0)
         self.mask = pygame.mask.from_surface(self.image)
         self.character = pygame.image.load('./img/characters/Cirno.png')
-        self.blood = 40
+        self.blood = 90
         self.bullet_num = 0
         self.change_delay = 0
         self.changed = False
@@ -227,10 +229,10 @@ class Cirno_Bullets(pygame.sprite.Sprite):
             if self.stage == 1:
                 self.t = [0,0]
         if self.stage == 2 and (not self.changed):
-            x = random.uniform(-1.0, 1.0)
-            y = random.uniform(-1.0, 1.0)
-            # x = x if x==0.0 else x+1
-            # y = y if y==0.0 else y+1
+            x = random.uniform(-1, 1)
+            y = random.uniform(-1, 1)
+            x = x if x!=0 else x+1
+            y = y if y!=0 else y+1
             self.t = [x*3, y*3]
             self.changed = True
 
@@ -275,6 +277,7 @@ def animate():
     screen.blit(player.image, player.rect)
     if grade == 1: #魔理沙关
         if not communication[0]: #魔理沙先行剧情
+            pygame.display.flip()
             text = []
             text.append(font.render("你醒啦", True, (255,255,255)))
             text.append(font.render("什么我已经变成女孩子了吗", True, (255,255,255)))
@@ -342,6 +345,35 @@ def animate():
             for bullet in marisa_bullets.sprites():
                 bullet.kill()
     if grade == 2: #琪露诺关
+        if not communication[1]: #琪露诺先行剧情
+            pygame.draw.rect(screen, (255,255,255), pygame.Rect(0,0,size[0],size[1]))
+            pygame.display.flip()
+            text = []
+            text.append(font.render("陪我玩", True, (255,255,255)))
+            text.append(font.render("不行我要去上学", True, (255,255,255)))
+            text.append(font.render("陪 我 玩", True, (255,255,255)))
+            text.append(font.render("你夏树吗你", True, (255,255,255)))
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(cirno.character, hostile_pos)
+            screen.blit(text[0], (500,500))
+            pygame.display.flip()
+            Continue()
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(reimu.character, reimu_pos)
+            screen.blit(text[1], (300,500))
+            pygame.display.flip()
+            Continue()
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(cirno.character, hostile_pos)
+            screen.blit(text[2], (500,500))
+            pygame.display.flip()
+            Continue()
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(reimu.character, reimu_pos)
+            screen.blit(text[3], (300,500))
+            pygame.display.flip()
+            Continue()
+            communication[1] = True
         screen.blit(cirno.image, cirno.rect)
         cirno.shoot()
         cirno.behit()
@@ -351,11 +383,39 @@ def animate():
             screen.blit(bullet.image, bullet.rect)
             if bullet.rect.left < 0 or bullet.rect.left > size[0] or bullet.rect.top > size[1]:
                 bullet.kill()
-        if cirno.change_delay >= 130:
+        if cirno.change_delay >= 140:
             for bullet in cirno_bullets:
                 bullet.stage = 2
         if cirno.blood <= 0:
-            exit()
+            grade = 3
+            text = []
+            text.append(font.render("欺负小女孩可不道德啊！", True, (255,255,255)))
+            text.append(font.render("明明是你先打的我好不好", True, (255,255,255)))
+            text.append(font.render("不管啦，反正你就是欺负我", True, (255,255,255)))
+            text.append(font.render("讲不讲理啊你！", True, (255,255,255)))
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(cirno.character, hostile_pos)
+            screen.blit(text[0], (500,500))
+            pygame.display.flip()
+            Continue()
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(reimu.character, reimu_pos)
+            screen.blit(text[1], (300,500))
+            pygame.display.flip()
+            Continue()
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(cirno.character, hostile_pos)
+            screen.blit(text[2], (500,500))
+            pygame.display.flip()
+            Continue()
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(reimu.character, reimu_pos)
+            screen.blit(text[3], (300,500))
+            pygame.display.flip()
+            Continue()
+            cirno.kill()
+            for bullet in cirno_bullets:
+                bullet.kill()
         if not cirno.changed:
             cirno.change_delay += 1
     pygame.display.flip()
