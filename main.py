@@ -74,8 +74,8 @@ class Player(pygame.sprite.Sprite):
         global gg
         if pygame.sprite.spritecollide(player, marisa_bullets, False, pygame.sprite.collide_mask):
             gg = True
-        # if pygame.sprite.spritecollide(player, cirno_bullets, False, pygame.sprite.collide_mask):
-        #     gg = True
+        if pygame.sprite.spritecollide(player, cirno_bullets, False, pygame.sprite.collide_mask):
+            gg = True
 
 class Player_Bullet(pygame.sprite.Sprite):
     def __init__(self, pos):
@@ -134,7 +134,7 @@ class Marisa(pygame.sprite.Sprite):
         self.rect.left, self.rect.top = (size[0]/2 - (self.rect.right - self.rect.left)/2, 0)
         self.mask = pygame.mask.from_surface(self.image)
         self.shoot_delay = 0
-        self.blood = 1#40
+        self.blood = 40
         self.character = pygame.image.load('./img/characters/Marisa.png')
         self.bullet_now = 0
         self.can_shoot = True
@@ -236,6 +236,38 @@ class Cirno_Bullets(pygame.sprite.Sprite):
             self.t = [x*3, y*3]
             self.changed = True
 
+class Sakuya(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('./img/gameimg/Sakuya_up.png')
+        self.rect = self.image.get_rect()
+        self.rect.left, self.rect.top = (size[0]/2 - (self.rect.right - self.rect.left)/2, 0)
+        self.mask = pygame.mask.from_surface(self.image)
+        self.character = pygame.image.load('./img/characters/Sakuya.png')
+        self.blood = 90
+        self.bullet_num = 0
+
+    def behit(self):
+        if pygame.sprite.spritecollide(sakuya, player_bullets, True, pygame.sprite.collide_mask):
+            self.blood -= 1
+
+    def shoot(self):
+        for bullet in sakuya_bullets:
+            bullet.move()
+
+class Sakuya_Bullets(pygame.sprite.Sprite):
+    def __init__(self, direction):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('./img/gameimg/bullet.png')
+        self.rect = self.image.get_rect()
+        self.rect.left, self.rect.top = sakuya.rect.left + (sakuya.rect.right - sakuya.rect.left)/2, sakuya.rect.top + (sakuya.rect.bottom - sakuya.rect.top)/2
+        self.mask = pygame.mask.from_surface(self.image)
+        self.direction = math.radians(direction)
+        self.t = [math.sin(self.direction)*5.1, math.cos(self.direction)*5.1]
+
+    def move(self):
+        self.rect = self.rect.move(self.t)
+
 def Continue():
     next = False
     while not next:
@@ -252,9 +284,11 @@ dock_left = Dock(bear = 'left')
 dock_right = Dock(bear = 'right')
 marisa = Marisa()
 cirno = Cirno()
+sakuya = Sakuya()
 player_bullets = pygame.sprite.Group()
 marisa_bullets = pygame.sprite.Group()
 cirno_bullets = pygame.sprite.Group()
+sakuya_bullets = pygame.sprite.Group()
 
 def animate():
     global player_pos, grade
@@ -418,12 +452,24 @@ def animate():
                 bullet.kill()
         if not cirno.changed:
             cirno.change_delay += 1
+    if grade == 3: # 咲夜关
+        screen.blit(sakuya.image, sakuya.rect)
+        sakuya.shoot()
+        sakuya.behit()
+        sakuya_blood = font.render("十六夜□夜血量：" + str(sakuya.blood), True, (0,0,0)) #十六夜咲夜显示有bug
+        screen.blit(sakuya_blood, (0,0))
+        for bullet in sakuya_bullets.sprites():
+            screen.blit(bullet.image, bullet.rect)
+            if bullet.rect.left < 0 or bullet.rect.left > size[0] or bullet.rect.top > size[1]:
+                bullet.kill()
+        if sakuya.blood <= 0:
+            return
     pygame.display.flip()
 
 running = True
 gg = False
 
-while running:
+while running: 
     animate()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
