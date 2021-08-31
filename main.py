@@ -10,9 +10,8 @@
 #      琪露诺——妹妹（？）
 #      咲夜——女仆
 #      紫妈sdakjfsaijfi——你妈
-#      早苗——老师
+#      早苗——老师（不干了）
 
-from hashlib import blake2b
 import pygame
 import sys, random, time, math
 
@@ -22,10 +21,10 @@ tick = 10
 
 # Game constant number
 PLAYERBULLETDELAY = 7
-MARISA_BLOOD = 1#40
-CIRNO_BLOOD = 1#80
-SAKUYA_BLOOD = 1#60
-YAKUMO_BLOOD = 50
+MARISA_BLOOD = 40
+CIRNO_BLOOD = 80
+SAKUYA_BLOOD = 60
+YAKUMO_BLOOD = 200
 
 pygame.init()
 screen = pygame.display.set_mode(size)
@@ -34,8 +33,8 @@ pygame.display.set_caption("东方上学传")
 
 player_bullets_delay = 0
 player_pos = [0, 0]
-grade = 4#1
-communication = [False, False, False, False, False] #代表10次剧情其中5个
+grade = 1
+communication = [False, False, False, False] #代表8次剧情其中4个
 hostile_pos = [0, 200]
 reimu_pos = [500, 200]
 dialog_pos = [0, 500]
@@ -303,32 +302,26 @@ class Yakumo(pygame.sprite.Sprite):
         self.character = pygame.image.load('./img/characters/Yakumo.png')
         self.blood = YAKUMO_BLOOD
         self.t = 0
-        self.ang = 1
-        self.v = 1
         self.shoot_CD = 0
 
+    # def func(self, x):
+    #     return -(2/9)*x+14/3
+
     def func(self, x):
-        return -(2/9)*x+14/3
+        return -(1.0/19)*x+14/3
 
     def behit(self):
         if pygame.sprite.spritecollide(sakuya, player_bullets, True, pygame.sprite.collide_mask):
             self.blood -= 1
 
     def shoot(self):
-        if self.shoot_CD >= 7:
-            yakumo_bullets.add(Yakumo_Bullets(self.ang + self.func(self.t)))
-            yakumo_bullets.add(Yakumo_Bullets(self.ang + self.func(self.t)+60))
-            yakumo_bullets.add(Yakumo_Bullets(self.ang + self.func(self.t)+120))
-            yakumo_bullets.add(Yakumo_Bullets(self.ang + self.func(self.t)+180))
-            yakumo_bullets.add(Yakumo_Bullets(self.ang + self.func(self.t)+240))
-            yakumo_bullets.add(Yakumo_Bullets(self.ang + self.func(self.t)+300))
-            self.t += self.v
-            if self.t == 30:
-                self.v *= -1
-                print(self.v)
-                print('aaaaaa')
-            self.ang += 6
+        if self.shoot_CD >= 2:
+            yakumo_bullets.add(Yakumo_Bullets(self.t*self.func(self.t)))
+            yakumo_bullets.add(Yakumo_Bullets(self.t*self.func(self.t)+90))
+            yakumo_bullets.add(Yakumo_Bullets(self.t*self.func(self.t)+180))
+            yakumo_bullets.add(Yakumo_Bullets(self.t*self.func(self.t)+270))
             self.shoot_CD = 0
+        self.t += 0.7
         for bullet in yakumo_bullets:
             bullet.move()
         self.shoot_CD += 1
@@ -344,8 +337,9 @@ class Yakumo_Bullets(pygame.sprite.Sprite):
         self.t = [math.sin(self.direction), math.cos(self.direction)]
 
     def move(self):
-        self.rect.left = self.rect.left + self.t[0]*7
-        self.rect.top = self.rect.top + self.t[1]*7
+        factor = 6
+        self.rect.left = self.rect.left + self.t[0]*factor
+        self.rect.top = self.rect.top + self.t[1]*factor
         # 我草他妈的self.rect.move()
 
 def continue_next():
@@ -376,8 +370,8 @@ sakuya_bullets = pygame.sprite.Group()
 yakumo_bullets = pygame.sprite.Group()
 
 def animate():
-    global player_pos, grade
-    #player.game_over()
+    global player_pos, grade, win
+    player.game_over()
     font = pygame.font.Font('./Font/FZLTHJW.ttf', 30)
     screen.fill(bg_color)
     player_pos = player.move()
@@ -394,7 +388,7 @@ def animate():
     screen.blit(dock_left.image, dock_left.rect)
     screen.blit(dock_right.image, dock_right.rect)
     screen.blit(player.image, player.rect)
-    """if grade == 1: #魔理沙关
+    if grade == 1: #魔理沙关
         if not communication[0]: #魔理沙先行剧情
             pygame.display.flip()
             text = []
@@ -606,8 +600,36 @@ def animate():
             sakuya.kill()
             for bullet in sakuya_bullets:
                 bullet.kill()
-    """
     if grade == 4: #紫妈
+        if not communication[3]:
+            pygame.draw.rect(screen, (255,255,255), pygame.Rect(0,0,size[0],size[1]))
+            pygame.display.flip()
+            text = []
+            text.append(font.render("听说你刚刚欺负琪露诺了？", True, (255,255,255)))
+            text.append(font.render("我不是我没有", True, (255,255,255)))
+            text.append(font.render("还狡辩", True, (255,255,255)))
+            text.append(font.render("别啊", True, (255,255,255)))
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(yakumo.character, hostile_pos)
+            screen.blit(text[0], (500,500))
+            pygame.display.flip()
+            continue_next()
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(reimu.character, reimu_pos)
+            screen.blit(text[1], (300,500))
+            pygame.display.flip()
+            continue_next()
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(yakumo.character, hostile_pos)
+            screen.blit(text[2], (500,500))
+            pygame.display.flip()
+            continue_next()
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(reimu.character, reimu_pos)
+            screen.blit(text[3], (100,500))
+            pygame.display.flip()
+            continue_next()
+            communication[3] = True
         screen.blit(yakumo.image, yakumo.rect)
         yakumo.shoot()
         yakumo.behit()
@@ -617,10 +639,26 @@ def animate():
             screen.blit(bullet.image, bullet.rect)
             if bullet.rect.left < 0 or bullet.rect.left > size[0] or bullet.rect.top > size[1] or bullet.rect.top <= 0:
                 bullet.kill()
+        if yakumo.blood <= 0:
+            win = True
+            text = []
+            text.append(font.render("反了你", True, (255,255,255)))
+            text.append(font.render("你先打的好不好", True, (255,255,255)))
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(yakumo.character, hostile_pos)
+            screen.blit(text[0], (500,500))
+            pygame.display.flip()
+            continue_next()
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(reimu.character, reimu_pos)
+            screen.blit(text[1], (300,500))
+            pygame.display.flip()
+            continue_next()
     pygame.display.flip()
 
 running = True
 gg = False
+win = False
 
 while running: 
     animate()
@@ -636,3 +674,14 @@ while running:
         pygame.display.flip()
         time.sleep(1)
         break
+    if win==True:
+        font = pygame.font.SysFont("Times", 70)
+        win_text = font.render("You Win!", True, (255, 100, 100))
+        screen.fill((255,0,0))
+        screen.blit(win_text, (340, 280))
+        pygame.display.flip()
+        time.sleep(1)
+        break
+
+pygame.quit()
+sys.exit()
