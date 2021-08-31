@@ -623,7 +623,7 @@ def animate():
             continue_next()
             pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
             screen.blit(reimu.character, reimu_pos)
-            screen.blit(text[3], (100,500))
+            screen.blit(text[3], (300,500))
             pygame.display.flip()
             continue_next()
             communication[3] = True
@@ -673,8 +673,8 @@ while running:
         break
     if win==True:
         font = pygame.font.SysFont("Times", 70)
-        win_text = font.render("You Win!", True, (255, 100, 100))
-        screen.fill((255,0,0))
+        win_text = font.render("You Win!", True, (100, 255, 100))
+        screen.fill((0,160,0))
         screen.blit(win_text, (340, 280))
         pygame.display.flip()
         time.sleep(1)
