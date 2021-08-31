@@ -260,13 +260,13 @@ class Sakuya(pygame.sprite.Sprite):
     def shoot(self):
         global player_pos
         if self.shoot_CD <= 5: #在四个方向生成子弹
-            for i in range(5, 20):
+            for i in range(7, 22):
                 sakuya_bullets.add(Sakuya_Bullets(45, [player_pos[0]-10*i,player_pos[1]-10*i], math.sqrt(((10*i)**2)*2)))
-            for i in range(5, 20):
+            for i in range(7, 22):
                 sakuya_bullets.add(Sakuya_Bullets(135, [player_pos[0]-10*i,player_pos[1]+10*i], math.sqrt(((10*i)**2)*2)))
-            for i in range(5, 20):
+            for i in range(7, 22):
                 sakuya_bullets.add(Sakuya_Bullets(225, [player_pos[0]+10*i,player_pos[1]+10*i], math.sqrt(((10*i)**2)*2)))
-            for i in range(5, 20):
+            for i in range(7, 22):
                 sakuya_bullets.add(Sakuya_Bullets(315, [player_pos[0]+10*i,player_pos[1]-10*i], math.sqrt(((10*i)**2)*2)))
             self.shoot_CD = 100
         for bullet in sakuya_bullets:
