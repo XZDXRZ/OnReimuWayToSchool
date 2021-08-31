@@ -352,9 +352,6 @@ def continue_next():
                 pygame.quit()
                 exit()
 
-def abs(x):
-    return x if x>=0 else -x
-
 player = Player()
 reimu = Reimu()
 dock_left = Dock(bear = 'left')  
