@@ -22,6 +22,9 @@ tick = 10
 
 # Game constant number
 PLAYERBULLETDELAY = 7
+MARISA_BLOOD = 40
+CIRNO_BLOOD = 90
+SAKUYA_BLOOD = 70
 
 pygame.init()
 screen = pygame.display.set_mode(size)
@@ -75,6 +78,8 @@ class Player(pygame.sprite.Sprite):
         if pygame.sprite.spritecollide(player, marisa_bullets, False, pygame.sprite.collide_mask):
             gg = True
         if pygame.sprite.spritecollide(player, cirno_bullets, False, pygame.sprite.collide_mask):
+            gg = True
+        if pygame.sprite.spritecollide(player, sakuya_bullets, False, pygame.sprite.collide_mask):
             gg = True
 
 class Player_Bullet(pygame.sprite.Sprite):
@@ -134,7 +139,7 @@ class Marisa(pygame.sprite.Sprite):
         self.rect.left, self.rect.top = (size[0]/2 - (self.rect.right - self.rect.left)/2, 0)
         self.mask = pygame.mask.from_surface(self.image)
         self.shoot_delay = 0
-        self.blood = 1#40
+        self.blood = MARISA_BLOOD
         self.character = pygame.image.load('./img/characters/Marisa.png')
         self.bullet_now = 0
         self.can_shoot = True
@@ -189,7 +194,7 @@ class Cirno(pygame.sprite.Sprite):
         self.rect.left, self.rect.top = (size[0]/2 - (self.rect.right - self.rect.left)/2, 0)
         self.mask = pygame.mask.from_surface(self.image)
         self.character = pygame.image.load('./img/characters/Cirno.png')
-        self.blood = 1#90
+        self.blood = CIRNO_BLOOD
         self.bullet_num = 0
         self.change_delay = 0
         self.changed = False
@@ -244,7 +249,7 @@ class Sakuya(pygame.sprite.Sprite):
         self.rect.left, self.rect.top = (size[0]/2 - (self.rect.right - self.rect.left)/2, 0)
         self.mask = pygame.mask.from_surface(self.image)
         self.character = pygame.image.load('./img/characters/Sakuya.png')
-        self.blood = 90
+        self.blood = SAKUYA_BLOOD
         self.bullet_num = 0
         self.shoot_CD = 0
 
@@ -255,14 +260,14 @@ class Sakuya(pygame.sprite.Sprite):
     def shoot(self):
         global player_pos
         if self.shoot_CD <= 5: #在四个方向生成子弹
-            for i in range(5, 15):
-                sakuya_bullets.add(Sakuya_Bullets(45, [player_pos[0]-i,player_pos[1]-i**2], math.sqrt(i**2+i**4)))
-            for i in range(5, 15):
-                sakuya_bullets.add(Sakuya_Bullets(225, [player_pos[0]-i,player_pos[1]+i**2], math.sqrt(i**2+i**4)))
-            for i in range(5, 15):
-                sakuya_bullets.add(Sakuya_Bullets(315, [player_pos[0]+i,player_pos[1]+i**2], math.sqrt(i**2+i**4)))
-            for i in range(5, 15):
-                sakuya_bullets.add(Sakuya_Bullets(45, [player_pos[0]+i,player_pos[1]-i**2], math.sqrt(i**2+i**4)))
+            for i in range(5, 20):
+                sakuya_bullets.add(Sakuya_Bullets(45, [player_pos[0]-10*i,player_pos[1]-10*i], math.sqrt(((10*i)**2)*2)))
+            for i in range(5, 20):
+                sakuya_bullets.add(Sakuya_Bullets(135, [player_pos[0]-10*i,player_pos[1]+10*i], math.sqrt(((10*i)**2)*2)))
+            for i in range(5, 20):
+                sakuya_bullets.add(Sakuya_Bullets(225, [player_pos[0]+10*i,player_pos[1]+10*i], math.sqrt(((10*i)**2)*2)))
+            for i in range(5, 20):
+                sakuya_bullets.add(Sakuya_Bullets(315, [player_pos[0]+10*i,player_pos[1]-10*i], math.sqrt(((10*i)**2)*2)))
             self.shoot_CD = 100
         for bullet in sakuya_bullets:
             bullet.move()
@@ -279,12 +284,11 @@ class Sakuya_Bullets(pygame.sprite.Sprite):
         self.direction = math.radians(direction)
         self.distance = distance
         self.t = [math.sin(self.direction)*2, math.cos(self.direction)*2]
-        # self.death = False
 
     def move(self):
         self.rect = self.rect.move(self.t)
         if (self.origin_pos[0]-self.rect.left)**2 + (self.origin_pos[1]-self.rect.top)**2 >= self.distance**2:
-            self.kill() # self.death = True
+            self.kill()
 
 def continue_next():
     next = False
@@ -310,7 +314,7 @@ sakuya_bullets = pygame.sprite.Group()
 
 def animate():
     global player_pos, grade
-    #player.game_over()
+    player.game_over()
     font = pygame.font.Font('./Font/FZLTHJW.ttf', 30)
     screen.fill(bg_color)
     player_pos = player.move()
@@ -471,6 +475,35 @@ def animate():
         if not cirno.changed:
             cirno.change_delay += 1
     if grade == 3: # 咲夜关
+        if not communication[2]:
+            pygame.draw.rect(screen, (255,255,255), pygame.Rect(0,0,size[0],size[1]))
+            pygame.display.flip()
+            text = []
+            text.append(font.render("主人你早饭没吃", True, (255,255,255)))
+            text.append(font.render("不行要迟到了", True, (255,255,255)))
+            text.append(font.render("要迟到也得吃", True, (255,255,255)))
+            text.append(font.render("你不去服侍大小姐来这凑热闹干嘛", True, (255,255,255)))
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(sakuya.character, hostile_pos)
+            screen.blit(text[0], (500,500))
+            pygame.display.flip()
+            continue_next()
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(reimu.character, reimu_pos)
+            screen.blit(text[1], (300,500))
+            pygame.display.flip()
+            continue_next()
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(sakuya.character, hostile_pos)
+            screen.blit(text[2], (500,500))
+            pygame.display.flip()
+            continue_next()
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(reimu.character, reimu_pos)
+            screen.blit(text[3], (100,500))
+            pygame.display.flip()
+            continue_next()
+            communication[2] = True
         screen.blit(sakuya.image, sakuya.rect)
         sakuya.shoot()
         sakuya.behit()
@@ -480,14 +513,36 @@ def animate():
             screen.blit(bullet.image, bullet.rect)
             if bullet.rect.left < 0 or bullet.rect.left > size[0] or bullet.rect.top > size[1]:
                 bullet.kill()
-            # if bullet.death == True:
-            #     bullet.kill()
         if sakuya.blood <= 0:
             grade = 4
+            text = []
+            text.append(font.render("你再打我就不干了", True, (255,255,255)))
+            text.append(font.render("我本来就没想让你干啊", True, (255,255,255)))
+            text.append(font.render("凎", True, (255,255,255))) # ko ji da yo!
+            text.append(font.render("你说啥？", True, (255,255,255)))
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(sakuya.character, hostile_pos)
+            screen.blit(text[0], (500,500))
+            pygame.display.flip()
+            continue_next()
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(reimu.character, reimu_pos)
+            screen.blit(text[1], (300,500))
+            pygame.display.flip()
+            continue_next()
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(sakuya.character, hostile_pos)
+            screen.blit(text[2], (500,500))
+            pygame.display.flip()
+            continue_next()
+            pygame.draw.rect(screen, (0,0,0), (0,450,1000,200), 0)
+            screen.blit(reimu.character, reimu_pos)
+            screen.blit(text[3], (300,500))
+            pygame.display.flip()
+            continue_next()
             sakuya.kill()
             for bullet in sakuya_bullets:
                 bullet.kill()
-            return
     pygame.display.flip()
 
 running = True
