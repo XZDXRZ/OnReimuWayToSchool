@@ -1,5 +1,5 @@
 # FBI Warning:
-# Till 2021/06/21, only God and me could understand this code.
+# Till 2021/08/31, only God and me could understand this code.
 # I guess a few months later, only God could understand it.
 
 # 东方上学传
@@ -9,8 +9,8 @@
 # 敌机：魔理沙——同居
 #      琪露诺——妹妹（？）
 #      咲夜——女仆
-#      早苗——你妈
-#      爱丽丝——老师
+#      紫妈sdakjfsaijfi——你妈
+#      早苗——老师
 
 from hashlib import blake2b
 import pygame
@@ -22,9 +22,10 @@ tick = 10
 
 # Game constant number
 PLAYERBULLETDELAY = 7
-MARISA_BLOOD = 40
-CIRNO_BLOOD = 80
-SAKUYA_BLOOD = 60
+MARISA_BLOOD = 1#40
+CIRNO_BLOOD = 1#80
+SAKUYA_BLOOD = 1#60
+YAKUMO_BLOOD = 50
 
 pygame.init()
 screen = pygame.display.set_mode(size)
@@ -33,7 +34,7 @@ pygame.display.set_caption("东方上学传")
 
 player_bullets_delay = 0
 player_pos = [0, 0]
-grade = 1
+grade = 4#1
 communication = [False, False, False, False, False] #代表10次剧情其中5个
 hostile_pos = [0, 200]
 reimu_pos = [500, 200]
@@ -80,6 +81,8 @@ class Player(pygame.sprite.Sprite):
         if pygame.sprite.spritecollide(player, cirno_bullets, False, pygame.sprite.collide_mask):
             gg = True
         if pygame.sprite.spritecollide(player, sakuya_bullets, False, pygame.sprite.collide_mask):
+            gg = True
+        if pygame.sprite.spritecollide(player, yakumo_bullets, False, pygame.sprite.collide_mask):
             gg = True
 
 class Player_Bullet(pygame.sprite.Sprite):
@@ -290,6 +293,61 @@ class Sakuya_Bullets(pygame.sprite.Sprite):
         if (self.origin_pos[0]-self.rect.left)**2 + (self.origin_pos[1]-self.rect.top)**2 >= self.distance**2:
             self.kill()
 
+class Yakumo(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('./img/gameimg/Yakumo_up.png')
+        self.rect = self.image.get_rect()
+        self.rect.left, self.rect.top = (size[0]/2 - (self.rect.right - self.rect.left)/2, 0)
+        self.mask = pygame.mask.from_surface(self.image)
+        self.character = pygame.image.load('./img/characters/Yakumo.png')
+        self.blood = YAKUMO_BLOOD
+        self.t = 0
+        self.ang = 1
+        self.v = 1
+        self.shoot_CD = 0
+
+    def func(self, x):
+        return -(2/9)*x+14/3
+
+    def behit(self):
+        if pygame.sprite.spritecollide(sakuya, player_bullets, True, pygame.sprite.collide_mask):
+            self.blood -= 1
+
+    def shoot(self):
+        if self.shoot_CD >= 7:
+            yakumo_bullets.add(Yakumo_Bullets(self.ang + self.func(self.t)))
+            yakumo_bullets.add(Yakumo_Bullets(self.ang + self.func(self.t)+60))
+            yakumo_bullets.add(Yakumo_Bullets(self.ang + self.func(self.t)+120))
+            yakumo_bullets.add(Yakumo_Bullets(self.ang + self.func(self.t)+180))
+            yakumo_bullets.add(Yakumo_Bullets(self.ang + self.func(self.t)+240))
+            yakumo_bullets.add(Yakumo_Bullets(self.ang + self.func(self.t)+300))
+            self.t += self.v
+            if self.t == 30:
+                self.v *= -1
+                print(self.v)
+                print('aaaaaa')
+            self.ang += 6
+            self.shoot_CD = 0
+        for bullet in yakumo_bullets:
+            bullet.move()
+        self.shoot_CD += 1
+
+class Yakumo_Bullets(pygame.sprite.Sprite):
+    def __init__(self, direction):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('./img/gameimg/bullet.png')
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.left, self.rect.top = yakumo.rect.left + (yakumo.rect.right - yakumo.rect.left)/2, yakumo.rect.top + (yakumo.rect.bottom - yakumo.rect.top)/2
+        self.direction = math.radians(direction)
+        self.t = [math.sin(self.direction), math.cos(self.direction)]
+
+    def move(self):
+        self.rect.left = self.rect.left + self.t[0]*7
+        self.rect.top = self.rect.top + self.t[1]*7
+        # 我草他妈的self.rect.move()
+
 def continue_next():
     next = False
     while not next:
@@ -300,21 +358,26 @@ def continue_next():
                 pygame.quit()
                 exit()
 
+def abs(x):
+    return x if x>=0 else -x
+
 player = Player()
 reimu = Reimu()
-dock_left = Dock(bear = 'left')
+dock_left = Dock(bear = 'left')  
 dock_right = Dock(bear = 'right')
 marisa = Marisa()
 cirno = Cirno()
 sakuya = Sakuya()
+yakumo = Yakumo()
 player_bullets = pygame.sprite.Group()
 marisa_bullets = pygame.sprite.Group()
 cirno_bullets = pygame.sprite.Group()
 sakuya_bullets = pygame.sprite.Group()
+yakumo_bullets = pygame.sprite.Group()
 
 def animate():
     global player_pos, grade
-    player.game_over()
+    #player.game_over()
     font = pygame.font.Font('./Font/FZLTHJW.ttf', 30)
     screen.fill(bg_color)
     player_pos = player.move()
@@ -331,7 +394,7 @@ def animate():
     screen.blit(dock_left.image, dock_left.rect)
     screen.blit(dock_right.image, dock_right.rect)
     screen.blit(player.image, player.rect)
-    if grade == 1: #魔理沙关
+    """if grade == 1: #魔理沙关
         if not communication[0]: #魔理沙先行剧情
             pygame.display.flip()
             text = []
@@ -542,6 +605,17 @@ def animate():
             continue_next()
             sakuya.kill()
             for bullet in sakuya_bullets:
+                bullet.kill()
+    """
+    if grade == 4: #紫妈
+        screen.blit(yakumo.image, yakumo.rect)
+        yakumo.shoot()
+        yakumo.behit()
+        yakumo_blood = font.render("八云紫血量：" + str(yakumo.blood), True, (0,0,0))
+        screen.blit(yakumo_blood, (0,0))
+        for bullet in yakumo_bullets.sprites():
+            screen.blit(bullet.image, bullet.rect)
+            if bullet.rect.left < 0 or bullet.rect.left > size[0] or bullet.rect.top > size[1] or bullet.rect.top <= 0:
                 bullet.kill()
     pygame.display.flip()
 
