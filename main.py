@@ -23,8 +23,8 @@ tick = 10
 # Game constant number
 PLAYERBULLETDELAY = 7
 MARISA_BLOOD = 40
-CIRNO_BLOOD = 90
-SAKUYA_BLOOD = 70
+CIRNO_BLOOD = 80
+SAKUYA_BLOOD = 60
 
 pygame.init()
 screen = pygame.display.set_mode(size)
