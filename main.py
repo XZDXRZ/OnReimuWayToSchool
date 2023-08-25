@@ -340,7 +340,6 @@ class Yakumo_Bullets(pygame.sprite.Sprite):
         factor = 6
         self.rect.left = self.rect.left + self.t[0]*factor
         self.rect.top = self.rect.top + self.t[1]*factor
-        # 我草他妈的self.rect.move()
 
 def continue_next():
     next = False
